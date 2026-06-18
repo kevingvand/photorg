@@ -2,13 +2,21 @@
 
 Photorg is a desktop-first photo culling app focused on fast RAW+JPEG paired review, keyboard-driven rating/labeling, and goal-based best-shot selection.
 
-## Current MVP Scope
+## MVP Scope (Phase 1 — Locked)
+
+Phase 1 scope is locked. The authoritative scope boundary, success metrics, test
+strategy, and dependency chain live in [docs/MVP_SCOPE.md](./docs/MVP_SCOPE.md).
+Per [ADR-004](./docs/DECISIONS.md#adr-004-mvp-scope-locked-to-phase-1), changes
+to MVP scope require a PR against that document.
+
+Headline capabilities in Phase 1:
 
 - Paired RAW+JPEG preview as one logical unit
 - Keyboard-first keep/reject/rating workflow
 - Immutable source policy (no direct RAW/JPEG modification by default)
 - Sidecar + internal database metadata model
-- Early rater workflow for tournament-style selection
+- Goal-based rater workflow for tournament-style selection
+- Single-user, single-catalog, single-directory per session
 
 ## Development
 
