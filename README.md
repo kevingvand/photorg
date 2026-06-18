@@ -34,4 +34,5 @@ Headline capabilities in Phase 1:
 
 - Setup guide: [SETUP.md](./SETUP.md)
 - Architecture: [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)
+- Rater algorithm: [docs/RATER_ALGORITHM.md](./docs/RATER_ALGORITHM.md)
 - Decisions log: [docs/DECISIONS.md](./docs/DECISIONS.md)
