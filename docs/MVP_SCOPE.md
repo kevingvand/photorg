@@ -13,7 +13,8 @@ Photorg Phase 1 (MVP) is explicitly locked to a **single-user, single-catalog, s
 
 1. **Paired preview:** RAW+JPEG are handled as one logical review unit.
 2. **Keyboard culling:** Keyboard-first keep/reject/rating flow is the default interaction model.
-3. **Sidecar output:** Final culling outcomes are written to sidecar metadata (`xmp:Rating`, `xmp:Label`) while internal state remains in the local app DB.
+3. **Best-shot rater workflow:** Goal-based/tournament-style selection is included in MVP for high-volume culling decisions.
+4. **Sidecar output:** Final culling outcomes are written to sidecar metadata (`xmp:Rating`, `xmp:Label`) while internal state remains in the local app DB.
 
 ## Explicit Non-Features (Out of Scope for MVP)
 

@@ -6,7 +6,7 @@ Photorg is a desktop-first photo culling app focused on fast RAW+JPEG paired rev
 
 Phase 1 MVP scope is now locked in [docs/MVP_SCOPE.md](./docs/MVP_SCOPE.md).
 
-- Must-haves: paired preview, keyboard culling, sidecar output
+- Must-haves: paired preview, keyboard culling, best-shot rater workflow, sidecar output
 - Explicitly out of scope: cloud sync, plugin ecosystem, advanced color correction
 - Delivery model: single-user first (no multi-user concurrency in MVP)
 
