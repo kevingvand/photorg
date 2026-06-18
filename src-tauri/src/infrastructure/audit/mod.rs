@@ -1,54 +1,32 @@
+/// Audit trail infrastructure: entry types and append-only logger.
+
+pub mod entry;
+
 use chrono::Utc;
-use serde::{Deserialize, Serialize};
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
-/// Audit log entry type
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(tag = "type", rename_all = "snake_case")]
-pub enum AuditEntry {
-    /// User made a culling decision
-    CullingDecision {
-        timestamp: String,
-        session_id: String,
-        image_a: String,
-        image_b: String,
-        winner: String,
-        reason: String,
-    },
-    /// Conflict was resolved
-    ConflictResolution {
-        timestamp: String,
-        session_id: String,
-        image_a: String,
-        image_b: String,
-        resolution_method: String,
-        winner: String,
-        before_state: serde_json::Value,
-        after_state: serde_json::Value,
-    },
-    /// Images were exported
-    Export {
-        timestamp: String,
-        session_id: String,
-        export_format: String,
-        images_exported: usize,
-        destination: String,
-        result: String,
-    },
-}
+pub use entry::AuditEntry;
 
-/// Audit logger for immutable append-only audit trail
+/// Append-only audit logger for immutable decision tracking.
+///
+/// Single Responsibility: Write audit entries to disk; never modify or delete existing entries.
+///
+/// Each audit log is scoped to a catalog directory and stored at `<catalog>/.photorg/audit.log`.
+/// Entries are serialized as JSONL (JSON Lines) for easy parsing by external tools.
 pub struct AuditLogger {
     path: PathBuf,
 }
 
 impl AuditLogger {
-    /// Create a new audit logger for the given catalog directory
+    /// Create a new audit logger for the given catalog directory.
     ///
     /// # Arguments
     /// * `catalog_dir` - Path to the catalog directory where audit.log will be stored at .photorg/audit.log
+    ///
+    /// # Errors
+    /// Returns IO error if the .photorg directory cannot be created.
     pub fn new(catalog_dir: impl AsRef<Path>) -> std::io::Result<Self> {
         let audit_dir = catalog_dir.as_ref().join(".photorg");
         std::fs::create_dir_all(&audit_dir)?;
@@ -58,7 +36,7 @@ impl AuditLogger {
         })
     }
 
-    /// Log a culling decision
+    /// Log a culling decision (user selected winner from pair).
     pub fn log_culling_decision(
         &self,
         session_id: &str,
@@ -79,7 +57,7 @@ impl AuditLogger {
         self.append_entry(&entry)
     }
 
-    /// Log a conflict resolution
+    /// Log a conflict resolution (algorithm resolved conflicting ratings).
     pub fn log_conflict_resolution(
         &self,
         session_id: &str,
@@ -104,7 +82,7 @@ impl AuditLogger {
         self.append_entry(&entry)
     }
 
-    /// Log an export event
+    /// Log an export event.
     pub fn log_export(
         &self,
         session_id: &str,
@@ -125,7 +103,7 @@ impl AuditLogger {
         self.append_entry(&entry)
     }
 
-    /// Append an entry to the audit log (append-only)
+    /// Append an entry to the audit log (append-only, never modified).
     fn append_entry(&self, entry: &AuditEntry) -> std::io::Result<()> {
         let json = serde_json::to_string(entry)
             .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
@@ -150,9 +128,10 @@ impl AuditLogger {
         Ok(())
     }
 
-    /// Read all audit entries from the log
+    /// Read all audit entries from the log.
     ///
     /// This is primarily for testing and diagnostic purposes.
+    /// Production code should not replay the audit trail without careful design.
     pub fn read_entries(&self) -> std::io::Result<Vec<AuditEntry>> {
         if !self.path.exists() {
             return Ok(Vec::new());

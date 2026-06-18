@@ -1,3 +1,11 @@
+/// Logging infrastructure: initialization and configuration.
+///
+/// This module is internal to the library; callers never interact with it directly.
+/// The app calls `logging::init_logging()` once at startup, then logging happens
+/// transparently via the `tracing` macros throughout the codebase.
+///
+/// Single Responsibility: Set up the tracing subscriber with file output.
+
 use std::path::PathBuf;
 use tracing_subscriber::fmt::format::FmtSpan;
 use tracing_subscriber::prelude::*;
@@ -7,6 +15,8 @@ use tracing_subscriber::util::SubscriberInitExt;
 ///
 /// Creates the logs directory if it doesn't exist and sets up file rotation.
 /// Log level defaults to INFO and can be controlled via RUST_LOG environment variable.
+///
+/// This should be called exactly once at application startup before any logging occurs.
 pub fn init_logging() -> Result<(), Box<dyn std::error::Error>> {
     let log_dir = get_log_dir()?;
 

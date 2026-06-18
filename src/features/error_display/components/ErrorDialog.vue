@@ -8,7 +8,7 @@
       <div class="w-full max-w-md rounded-lg bg-white shadow-lg animate-in slide-in-from-top-2 duration-300">
         <!-- Header -->
         <div class="flex items-center gap-4 border-b border-gray-200 p-6">
-          <span class="text-2xl">❌</span>
+          <span class="text-2xl">{{ icon }}</span>
           <h2 class="flex-1 text-lg font-semibold text-gray-900">{{ title }}</h2>
           <button
             class="flex h-8 w-8 items-center justify-center rounded transition-colors hover:bg-gray-100"
@@ -22,12 +22,20 @@
         <div class="p-6">
           <p class="mb-6 text-gray-700 leading-relaxed">{{ description }}</p>
 
+          <!-- Slot for custom content -->
+          <slot />
+
           <!-- Actions -->
-          <div class="mb-4 flex flex-wrap gap-3">
+          <div v-if="actions.length > 0" class="mb-4 flex flex-wrap gap-3">
             <button
               v-for="action in actions"
               :key="action.id"
-              class="flex-1 min-w-[120px] rounded bg-blue-500 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-600 active:bg-blue-700"
+              :class="[
+                'flex-1 min-w-[120px] rounded px-4 py-2.5 text-sm font-medium transition-colors',
+                action.style === 'secondary'
+                  ? 'bg-gray-200 text-gray-900 hover:bg-gray-300 active:bg-gray-400'
+                  : 'bg-blue-500 text-white hover:bg-blue-600 active:bg-blue-700',
+              ]"
               @click="handleAction(action.id)"
             >
               {{ action.label }}
@@ -35,17 +43,14 @@
           </div>
 
           <!-- Details -->
-          <details v-if="showDetails" class="rounded border border-gray-200 p-3">
+          <details v-if="showDetails && detailsContent" class="rounded border border-gray-200 p-3">
             <summary class="cursor-pointer select-none font-medium text-gray-600 transition-colors hover:text-gray-900 p-1">
-              Technical Details
+              {{ detailsLabel }}
             </summary>
             <div class="mt-3 border-t border-gray-200 pt-3 text-sm text-gray-600">
-              <p v-if="errorCode" class="mb-2">
-                <strong>Error Code:</strong> {{ errorCode }}
-              </p>
-              <p v-if="errorMessage" class="mb-3 break-words">
-                <strong>Message:</strong> {{ errorMessage }}
-              </p>
+              <slot name="details">
+                <p class="mb-3 break-words whitespace-pre-wrap">{{ detailsContent }}</p>
+              </slot>
               <button
                 class="rounded border border-gray-300 bg-gray-100 px-3 py-1.5 text-xs transition-colors hover:bg-gray-200"
                 @click="copyDetailsToClipboard"
@@ -61,34 +66,46 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 
-interface ErrorAction {
+/**
+ * Generic reusable dialog component.
+ *
+ * Can be used for errors, warnings, confirmations, or any other modal content.
+ * Supports custom slots for flexible content, multiple action buttons, and details expansion.
+ */
+
+interface DialogAction {
   id: string
   label: string
   handler: () => void | Promise<void>
+  style?: 'primary' | 'secondary'
 }
 
-interface ErrorDialogProps {
+interface GenericDialogProps {
   title?: string
   description?: string
-  errorCode?: string
-  errorMessage?: string
-  actions?: ErrorAction[]
+  icon?: string
+  actions?: DialogAction[]
   showDetails?: boolean
+  detailsContent?: string
+  detailsLabel?: string
 }
 
-const props = withDefaults(defineProps<ErrorDialogProps>(), {
-  title: 'An Error Occurred',
-  description: 'Something unexpected happened. Please try again.',
-  showDetails: true,
+const props = withDefaults(defineProps<GenericDialogProps>(), {
+  title: 'Dialog',
+  description: '',
+  icon: 'ℹ️',
   actions: () => [
     {
       id: 'close',
       label: 'Close',
       handler: () => {},
+      style: 'primary',
     },
   ],
+  showDetails: false,
+  detailsLabel: 'Details',
 })
 
 const isVisible = ref(true)
@@ -106,7 +123,7 @@ const handleAction = async (actionId: string) => {
 }
 
 const copyDetailsToClipboard = async () => {
-  const details = `Error Code: ${props.errorCode || 'N/A'}\nMessage: ${props.errorMessage || 'N/A'}`
+  const details = props.detailsContent || ''
   try {
     await navigator.clipboard.writeText(details)
   } catch (err) {
