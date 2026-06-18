@@ -35,3 +35,27 @@ Headline capabilities in Phase 1:
 - Setup guide: [SETUP.md](./SETUP.md)
 - Architecture: [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)
 - Decisions log: [docs/DECISIONS.md](./docs/DECISIONS.md)
+- **Testing Quick Start**: [TESTING_QUICKSTART.md](./TESTING_QUICKSTART.md)
+- **Testing Strategy**: [docs/TESTING_STRATEGY.md](./docs/TESTING_STRATEGY.md)
+
+## Testing
+
+Run tests with:
+
+```bash
+# Frontend tests
+npm run test:run
+
+# Rust tests
+npm run test:rust
+
+# All tests
+npm run test:all
+
+# Coverage reports
+npm run test:coverage          # Frontend coverage
+npm run test:rust:coverage     # Rust coverage
+npm run test:all:coverage      # Both
+```
+
+See [TESTING_QUICKSTART.md](./TESTING_QUICKSTART.md) for more details.
